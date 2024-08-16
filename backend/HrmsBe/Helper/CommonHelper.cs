@@ -1,24 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using HrmsBe.Dto.V1.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Net;
 
 namespace HrmsBe.Helper
 {
     public static class CommonHelper
     {
-        //public void CreateUser(string password)
-        //{
-        //    string hashedPassword = BCrypt.HashPassword(password);
-        //    // Save hashedPassword to your database
-        //}
-
-        //public bool ValidateUser(string enteredPassword, string storedHashedPassword)
-        //{
-        //    return BCrypt.Verify(enteredPassword, storedHashedPassword);
-        //}
         public static DateTime CurrentDateTime()
         {
             return DateTime.UtcNow.AddHours(6);
         }
+
         public static void ApplyCommonConfigurations(ModelBuilder modelBuilder)
         {
             var ulidConverter = new UlidToStringConverter();
@@ -45,7 +38,8 @@ namespace HrmsBe.Helper
                 }
 
                 // Apply Ulid to string conversion for properties of type Ulid or Ulid?
-                foreach (var property in properties.Where(p => p.PropertyType == typeof(Ulid) || p.PropertyType == typeof(Ulid?)))
+                foreach (var property in properties.Where(p =>
+                             p.PropertyType == typeof(Ulid) || p.PropertyType == typeof(Ulid?)))
                 {
                     modelBuilder.Entity(entityType.ClrType)
                         .Property(property.Name)
@@ -53,15 +47,28 @@ namespace HrmsBe.Helper
                 }
             }
         }
-    }
-    public class UlidToStringConverter : ValueConverter<Ulid, string>
-    {
-        public UlidToStringConverter() : base(
-            ulid => ulid.ToString(), // Convert Ulid to string
-            value => Ulid.Parse(value) // Convert string to Ulid
-        )
+
+        public static Ulid StringToUlidConverter(string userId)
         {
+            if (Ulid.TryParse(userId, out Ulid user))
+            {
+                return user;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid User ID format.");
+            }
         }
+
+        public class UlidToStringConverter : ValueConverter<Ulid, string>
+        {
+            public UlidToStringConverter() : base(
+                ulid => ulid.ToString(), // Convert Ulid to string
+                value => Ulid.Parse(value) // Convert string to Ulid
+            )
+            {
+            }
+        }
+
     }
-    
 }

@@ -1,37 +1,39 @@
-﻿//using Asp.Versioning;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-//namespace HrmsBe.Controllers.v1
-//{
-//    [ApiVersion("1.0")]
-//    [Route("api/v{version:apiVersion}/[controller]")]
-//    [ApiController]
-//    public class WeatherForecastController : ControllerBase
-//    {
-       
-//        private static readonly string[] Summaries = new[]
-//        {
-//            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-//        };
+namespace HrmsBe.Controllers.v1
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public class WeatherForecastController : ControllerBase
+    {
 
-//        private readonly ILogger<WeatherForecastController> _logger;
+        private static readonly string[] Summaries = new[]
+        {
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
 
-//        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-//        {
-//            _logger = logger;
-//        }
+        private readonly ILogger<WeatherForecastController> _logger;
 
-//        [HttpGet(Name = "GetWeatherForecast")]
-//        public IEnumerable<WeatherForecast> Get()
-//        {
-//            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-//                {
-//                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-//                    TemperatureC = Random.Shared.Next(-20, 55),
-//                    Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-//                })
-//                .ToArray();
-//        }
-//    }
-//}
+        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        {
+            _logger = logger;
+        }
+
+        [HttpGet(Name = "GetWeatherForecast")]
+        public IEnumerable<WeatherForecast> Get()
+        {
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+                .ToArray();
+        }
+    }
+}
