@@ -1,6 +1,7 @@
 ﻿using HrmsBe.Dto.V1.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Data;
 using System.Net;
 
 namespace HrmsBe.Helper
@@ -50,14 +51,22 @@ namespace HrmsBe.Helper
 
         public static Ulid StringToUlidConverter(string userId)
         {
-            if (Ulid.TryParse(userId, out Ulid user))
+            try
             {
-                return user;
+                if (Ulid.TryParse(userId, out Ulid user))
+                {
+                    return user;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid User ID format.");
+                }
             }
-            else
+            catch (Exception e)
             {
-                throw new ArgumentException("Invalid User ID format.");
+                throw new Exception(e.Message);
             }
+            
         }
 
         public class UlidToStringConverter : ValueConverter<Ulid, string>
@@ -69,6 +78,89 @@ namespace HrmsBe.Helper
             {
             }
         }
+
+        public static DataTable ConvertDynamicListToDataTable(IEnumerable<dynamic> items)
+        {
+            var dataTable = new DataTable();
+
+            if (items == null || !items.Any())
+            {
+                return dataTable;
+            }
+
+            // Extract the properties from the first item to create the columns
+            var firstItem = items.First();
+            var properties = ((IDictionary<string, object>)firstItem).Keys;
+
+            // Create the columns in the DataTable
+            foreach (var prop in properties)
+            {
+                dataTable.Columns.Add(prop);
+            }
+
+            // Populate the DataTable with the items
+            foreach (var item in items)
+            {
+                var row = dataTable.NewRow();
+                var values = ((IDictionary<string, object>)item).Values;
+
+                int i = 0;
+                foreach (var value in values)
+                {
+                    row[i] = value ?? DBNull.Value;
+                    i++;
+                }
+
+                dataTable.Rows.Add(row);
+            }
+
+            return dataTable;
+        }
+
+        public static List<T> ConvertDataTableToList<T>(DataTable dataTable) where T : new()
+        {
+            var modelList = new List<T>();
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                var model = new T();
+                foreach (DataColumn column in dataTable.Columns)
+                {
+                    // Get the property with the same name as the column name
+                    var property = typeof(T).GetProperty(column.ColumnName);
+                    if (property != null && row[column] != DBNull.Value)
+                    {
+                        // Set the value of the property from the DataRow
+                        property.SetValue(model, Convert.ChangeType(row[column], property.PropertyType));
+                    }
+                }
+                modelList.Add(model);
+            }
+
+            return modelList;
+        }
+        public static T ConvertDataTableToSingleModel<T>(DataTable dataTable) where T : new()
+        {
+            if (dataTable == null || dataTable.Rows.Count == 0)
+            {
+                return default;
+            }
+
+            var model = new T();
+            DataRow row = dataTable.Rows[0];
+
+            foreach (DataColumn column in dataTable.Columns)
+            {
+                var property = typeof(T).GetProperty(column.ColumnName);
+                if (property != null && row[column] != DBNull.Value)
+                {
+                    property.SetValue(model, Convert.ChangeType(row[column], property.PropertyType));
+                }
+            }
+
+            return model;
+        }
+
 
     }
 }

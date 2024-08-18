@@ -44,7 +44,7 @@ namespace HrmsBe.Repository
                     IsActive = true
                 };
                 user.CreatedBy = user.Id;
-                _context.Users.Add(user);
+                await _context.Users.AddAsync(user);
                 auditInfo = new AuditDto()
                 {
                     ControllerName = System.Reflection.MethodBase.GetCurrentMethod()!.Name,

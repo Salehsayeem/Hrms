@@ -10,6 +10,7 @@ namespace HrmsBe.Helper
             services.AddSingleton<AuthHelper>();
             services.AddSingleton<MongoDbService>();
             services.AddTransient<IAuthRepo, AuthRepo>();
+            services.AddTransient<IHouseRepo, HouseRepo>();
 
             return services;
         }

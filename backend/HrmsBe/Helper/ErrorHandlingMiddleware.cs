@@ -10,6 +10,7 @@ public class ErrorHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly MongoDbService _mongoDbService;
+
     public ErrorHandlingMiddleware(RequestDelegate next, MongoDbService mongoDbService)
     {
         _next = next;
@@ -24,35 +25,50 @@ public class ErrorHandlingMiddleware
         }
         catch (CustomExceptionWithAudit ex)
         {
-            await HandleExceptionAsync(context, ex);
+            await HandleExceptionAsync(context, ex, HttpStatusCode.InternalServerError);
+        }
+        catch (Exception ex) // Handle other types of exceptions
+        {
+            var auditInfo = new AuditDto
+            {
+                Description = ex.Message,
+                ControllerName = context.GetEndpoint()?.DisplayName ?? "Unknown",
+                RequestParameters = await GetRequestBodyAsync(context.Request),
+                StatusCode = (int)HttpStatusCode.InternalServerError
+            };
+
+            await HandleExceptionAsync(context, new CustomExceptionWithAudit(ex.Message, auditInfo), HttpStatusCode.InternalServerError);
         }
     }
 
-    private  async Task HandleExceptionAsync(HttpContext context, CustomExceptionWithAudit exception)
+    private async Task HandleExceptionAsync(HttpContext context, CustomExceptionWithAudit exception, HttpStatusCode statusCode)
     {
         var auditInfo = exception.AuditInfo ?? new AuditDto
         {
             Description = exception.Message,
             ControllerName = context.GetEndpoint()?.DisplayName ?? "Unknown",
             RequestParameters = await GetRequestBodyAsync(context.Request),
-            StatusCode = (int)HttpStatusCode.InternalServerError
+            StatusCode = (int)statusCode
         };
+
         await _mongoDbService.CreateOrUpdateAudit(auditInfo);
 
         var response = context.Response;
         response.ContentType = "application/json";
-        response.StatusCode = (int)context.Response.StatusCode;
+        response.StatusCode = (int)statusCode;
 
         var errorResponse = new CommonResponseDto
         {
             Message = exception.Message,
-            Data = exception.Data,
+            Data = null, // You can include more data if needed
             Succeed = false,
-            StatusCode = context.Response.StatusCode
+            StatusCode = (int)statusCode
         };
+
         var result = JsonSerializer.Serialize(errorResponse);
         await response.WriteAsync(result);
     }
+
     private async Task<string> GetRequestBodyAsync(HttpRequest request)
     {
         request.EnableBuffering();
@@ -65,6 +81,7 @@ public class ErrorHandlingMiddleware
         return body;
     }
 }
+
 public class CustomExceptionWithAudit : Exception
 {
     public AuditDto AuditInfo { get; }
