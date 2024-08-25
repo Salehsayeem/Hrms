@@ -18,6 +18,9 @@ namespace HrmsBe.Context
         public DbSet<User> Users { get; set; }
         public DbSet<House> Houses { get; set; }
         public DbSet<RoomCategory> RoomCategories { get; set; }
+        public DbSet<RenterType> RenterTypes { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<RoomDetails> RoomDetails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

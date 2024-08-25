@@ -11,7 +11,9 @@ namespace HrmsBe.Helper
             services.AddSingleton<MongoDbService>();
             services.AddTransient<IAuthRepo, AuthRepo>();
             services.AddTransient<IHouseRepo, HouseRepo>();
-
+            services.AddTransient<IRoomCategoriesRepo, RoomCategoryRepo>();
+            services.AddTransient<IRenterTypeRepo, RenterTypeRepo>();
+            services.AddTransient<IRoomRepo, RoomRepo>();
             return services;
         }
     }

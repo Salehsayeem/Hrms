@@ -1,7 +1,10 @@
-﻿using HrmsBe.Models;
+﻿using HrmsBe.Dto.V1.RoomCategory;
+using HrmsBe.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Diagnostics;
+using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HrmsBe.Helper
@@ -33,7 +36,6 @@ namespace HrmsBe.Helper
             var collections = database.ListCollections(new ListCollectionsOptions { Filter = filter });
             return collections.Any();
         }
-
         public async Task CreateOrUpdateAudit(AuditDto audit)
         {
             try
@@ -78,6 +80,17 @@ namespace HrmsBe.Helper
             {
                 throw new Exception(e.Message);
             }
+        }
+        public AuditDto CreateAuditInfo(string description,string methodName, object obj, int statusCode, string userId)
+        {
+            return new AuditDto
+            {
+                ControllerName = methodName,
+                Description = $"{description}",
+                RequestParameters = JsonSerializer.Serialize(obj),
+                StatusCode = statusCode,
+                UserId = userId
+            };
         }
     }
 }

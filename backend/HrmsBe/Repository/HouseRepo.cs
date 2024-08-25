@@ -10,21 +10,26 @@ using HrmsBe.Helper;
 using HrmsBe.StoredProcedure;
 using MongoDB.Driver.Core.Configuration;
 using Npgsql;
+using System.Diagnostics;
+using HrmsBe.Dto.V1.RoomCategory;
 
 namespace HrmsBe.Repository
 {
     public class HouseRepo : IHouseRepo
     {
         private readonly ApplicationDbContext _context;
+        private readonly MongoDbService _mongoDbService;
 
-        public HouseRepo(ApplicationDbContext context)
+        public HouseRepo(ApplicationDbContext context, MongoDbService mongoDbService)
         {
             _context = context;
+            _mongoDbService = mongoDbService;
         }
 
         public async Task<CommonResponseDto> CreateUpdateHouse(CreateOrUpdateHouseDto obj)
         {
             var auditInfo = new AuditDto();
+            string methodName = nameof(CreateUpdateHouse);
             try
             {
                 var response = new CommonResponseDto();
@@ -34,10 +39,12 @@ namespace HrmsBe.Repository
                     var alreadyExist = await _context.Houses.Where(a => a.Name.ToLower() == obj.Name.ToLower() && a.CreatedBy == CommonHelper.StringToUlidConverter(obj.UserId) && a.IsActive).FirstOrDefaultAsync();
                     if (alreadyExist != null)
                     {
-                        response.Message = obj.Name + " Already exists";
-                        response.StatusCode = 500;
-                        response.Succeed = false;
-                        return response;
+                        return new CommonResponseDto
+                        {
+                            Message = $"{obj.Name} already exists",
+                            StatusCode = 500,
+                            Succeed = false
+                        };
                     }
                     var data = new House()
                     {
@@ -49,22 +56,13 @@ namespace HrmsBe.Repository
                     };
 
                     await _context.Houses.AddAsync(data);
-                    auditInfo = new AuditDto()
-                    {
-                        ControllerName = System.Reflection.MethodBase.GetCurrentMethod()!.Name,
-                        Description = $"{obj.Name} house Added",
-                        RequestParameters = JsonSerializer.Serialize(obj).ToString(),
-                        StatusCode = 200,
-                        UserId = data.CreatedBy.ToString()
-                    };
-                    _context.AuditInfo = auditInfo;
-                    await _context.SaveChangesAsync();
+                    auditInfo = _mongoDbService.CreateAuditInfo($"{obj.Name} house Added",methodName,obj,  200, obj.UserId);
+                   
 
                     response.Message = data.Name + " -House has been added!";
                     response.StatusCode = 200;
                     response.Succeed = true;
                     response.Data = data;
-                    return response;
                 }
                 else
                 {
@@ -80,25 +78,19 @@ namespace HrmsBe.Repository
                     data.Address = obj.Address;
                     data.Contact = obj.Contact;
                     data.ModifiedBy = CommonHelper.StringToUlidConverter(obj.UserId);
-                    data.IsActive = true;
+
                     _context.Houses.Update(data);
-                    auditInfo = new AuditDto()
-                    {
-                        ControllerName = System.Reflection.MethodBase.GetCurrentMethod()!.Name,
-                        Description = $"{obj.Name} house Updated",
-                        RequestParameters = JsonSerializer.Serialize(obj).ToString(),
-                        StatusCode = 200,
-                        UserId = data.CreatedBy.ToString()
-                    };
-                    _context.AuditInfo = auditInfo;
-                    await _context.SaveChangesAsync();
+                    auditInfo = _mongoDbService.CreateAuditInfo($"{obj.Name} house Updated",methodName, obj, 200, obj.UserId);
 
                     response.Message = data.Name + " - House has been updated!";
                     response.StatusCode = 200;
                     response.Succeed = true;
-                    return response;
+                    
 
                 }
+                _context.AuditInfo = auditInfo;
+                await _context.SaveChangesAsync();
+                return response;
             }
             catch (Exception ex)
             {
@@ -132,20 +124,17 @@ namespace HrmsBe.Repository
         {
             try
             {
-                var response = new GetHouseDto();
                 var data = await _context.Houses.FirstOrDefaultAsync(a => a.Id == id && a.IsActive);
-                if (data == null)
+                if (data != null)
                 {
-                    return response;
+                    return new GetHouseDto()
+                    {
+                        Id = data.Id,
+                        Name = data.Name
+                    };
                 }
 
-                return new GetHouseDto()
-                {
-                    Address = data.Address,
-                    Contact = data.Contact,
-                    Name = data.Name,
-                    Id = data.Id
-                };
+                return null;
             }
             catch (Exception e)
             {
@@ -155,6 +144,7 @@ namespace HrmsBe.Repository
 
         public async Task<CommonResponseDto> DeleteHouse(long id, string userId)
         {
+            string methodName = nameof(DeleteHouse);
             try
             {
                 var data = await _context.Houses.FirstOrDefaultAsync(a => a.Id == id && a.IsActive);
@@ -171,16 +161,12 @@ namespace HrmsBe.Repository
                 data.ModifiedBy = CommonHelper.StringToUlidConverter(userId);
                 data.IsActive = true;
                 _context.Houses.Update(data);
-                var obj = new
-                {
-                    id = id,
-                    userId = userId
-                };
+
                 var auditInfo = new AuditDto()
                 {
-                    ControllerName = System.Reflection.MethodBase.GetCurrentMethod()!.Name,
+                    ControllerName = methodName,
                     Description = $"{data.Name} house Deleted ",
-                    RequestParameters = JsonSerializer.Serialize(obj).ToString(),
+                    RequestParameters = JsonSerializer.Serialize(new {id,userId}).ToString(),
                     StatusCode = 200,
                     UserId = data.ModifiedBy.ToString() ?? string.Empty
                 };

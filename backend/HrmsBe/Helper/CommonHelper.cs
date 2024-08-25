@@ -59,7 +59,7 @@ namespace HrmsBe.Helper
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid User ID format.");
+                    throw new Exception("Invalid User ID format.");
                 }
             }
             catch (Exception e)
