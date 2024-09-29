@@ -14,6 +14,7 @@ namespace HrmsBe.Helper
             services.AddTransient<IRoomCategoriesRepo, RoomCategoryRepo>();
             services.AddTransient<IRenterTypeRepo, RenterTypeRepo>();
             services.AddTransient<IRoomRepo, RoomRepo>();
+            services.AddTransient<ICommonRepository, CommonRepository>();
             return services;
         }
     }

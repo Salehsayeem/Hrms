@@ -34,5 +34,20 @@
         public string Email { get; set; } = "";
         public string Phone { get; set; } = "";
     }
+    public class MenuDto
+    {
+        public int FirstLevelMenuId { get; set; }
+        public string Name { get; set; } = "";
+        public string Link { get; set; } = "";
+        public List<SecondLevelMenuDto> SecondLevelMenu { get; set; } = [];
+    }
+
+    public class SecondLevelMenuDto
+    {
+        public int SecondLevelMenuId { get; set; }
+        public string Name { get; set; } = "";
+        public string Link { get; set; } = "";
+    }
+
 
 }

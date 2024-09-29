@@ -50,14 +50,6 @@ namespace HrmsBe.Controllers.v1
                         Message = "Date must be in between 1 and 30."
                     };
                 }
-                {
-                    return new CommonResponseDto()
-                    {
-                        StatusCode = 400,
-                        Succeed = false,
-                        Message = "Base Price must be positive."
-                    };
-                }
                 var data = await repo.UpdateRoom(model);
                 return data;
             }

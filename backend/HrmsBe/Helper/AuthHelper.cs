@@ -1,8 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using HrmsBe.Dto.V1.Auth;
 using HrmsBe.Models;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace HrmsBe.Helper
 {
@@ -14,6 +16,8 @@ namespace HrmsBe.Helper
         {
             _configuration = configuration;
         }
+
+       
         public string GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -22,10 +26,11 @@ namespace HrmsBe.Helper
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.MobilePhone, user.Phone),
-                    new Claim(ClaimTypes.Name, user.Name)
+                    new Claim("UserId", user.Id.ToString()),
+                    new Claim("Email", user.Email),
+                    new Claim("Phone", user.Phone),
+                    new Claim("Name", user.Name),
+
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),

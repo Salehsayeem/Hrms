@@ -60,7 +60,11 @@ namespace HrmsBe.Repository
                 response.Message = "User Registered Successfully";
                 response.StatusCode = 200;
                 response.Succeed = true;
-                response.Data = token;
+                response.Data = new
+                {
+                    Token = token,
+                    Permissions = Permissions()
+                };
                 return response;
             }
             catch (Exception e)
@@ -69,7 +73,59 @@ namespace HrmsBe.Repository
                 throw new CustomExceptionWithAudit(e.Message, auditInfo);
             }
         }
-
+        public List<MenuDto> Permissions()
+        {
+            var menu = new List<MenuDto>
+            {
+                 new MenuDto
+                {
+                    FirstLevelMenuId = 1,
+                    Name = "Dashboard",
+                    Link = "/dashboard",
+                    SecondLevelMenu = new List<SecondLevelMenuDto>()
+                },
+                new MenuDto
+                {
+                    FirstLevelMenuId = 2,
+                    Name = "Manage",
+                    Link = "",
+                    SecondLevelMenu = new List<SecondLevelMenuDto>
+                    {
+                        new SecondLevelMenuDto { SecondLevelMenuId = 1, Name = "House", Link = "/house" },
+                        new SecondLevelMenuDto { SecondLevelMenuId = 2, Name = "Room Category", Link = "/room-categories" },
+                        new SecondLevelMenuDto { SecondLevelMenuId = 3, Name = "Room", Link = "/room" },
+                        new SecondLevelMenuDto { SecondLevelMenuId = 4, Name = "Renter Type", Link = "/renter-type" },
+                        new SecondLevelMenuDto { SecondLevelMenuId = 5, Name = "Renter", Link = "/renter" }
+                    }
+                },
+                new MenuDto
+                {
+                    FirstLevelMenuId = 3,
+                    Name = "Rent Room",
+                    Link = "/rent-room",
+                    SecondLevelMenu = new List<SecondLevelMenuDto>()
+                },
+                new MenuDto
+                {
+                    FirstLevelMenuId = 4,
+                    Name = "Bills",
+                    Link = "/bills",
+                    SecondLevelMenu = new List<SecondLevelMenuDto>()
+                },
+                new MenuDto
+                {
+                    FirstLevelMenuId = 5,
+                    Name = "Reports",
+                    Link = "/reports",
+                    SecondLevelMenu = new List<SecondLevelMenuDto>
+                    {
+                        new SecondLevelMenuDto { SecondLevelMenuId = 1, Name = "Report1", Link = "/Report1" },
+                        new SecondLevelMenuDto { SecondLevelMenuId = 1, Name = "Report2", Link = "/Report2" },
+                    }
+                }
+            };
+            return menu;
+        }
         public async Task<CommonResponseDto> Login(LoginDto model)
         {
             var auditInfo = new AuditDto();
@@ -88,7 +144,11 @@ namespace HrmsBe.Repository
                 response.Message = "Logged in Successfully";
                 response.StatusCode = 200;
                 response.Succeed = true;
-                response.Data = token;
+                response.Data = new
+                {
+                    Token = token,
+                    Permissions = Permissions()
+                };
                 return response;
             }
             catch (Exception e)

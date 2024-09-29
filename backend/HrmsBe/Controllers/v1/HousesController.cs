@@ -10,7 +10,7 @@ namespace HrmsBe.Controllers.v1
 {
     [Route("api/[controller]")]
     [ApiController]
-   // [Authorize]
+    [Authorize]
     public class HousesController : ControllerBase
     {
         private readonly IHouseRepo _repo;
@@ -83,13 +83,7 @@ namespace HrmsBe.Controllers.v1
             try
             {
                 var data = await _repo.DeleteHouse(id, userId);
-                return new CommonResponseDto()
-                {
-                    Data = data,
-                    Message = string.Empty,
-                    StatusCode = 200,
-                    Succeed = true
-                };
+                return data;
             }
             catch (Exception ex)
             {

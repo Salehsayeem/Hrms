@@ -130,7 +130,9 @@ namespace HrmsBe.Repository
                     return new GetHouseDto()
                     {
                         Id = data.Id,
-                        Name = data.Name
+                        Name = data.Name,
+                        Address = data.Address,
+                        Contact = data.Contact,
                     };
                 }
 
@@ -159,7 +161,7 @@ namespace HrmsBe.Repository
                     };
                 }
                 data.ModifiedBy = CommonHelper.StringToUlidConverter(userId);
-                data.IsActive = true;
+                data.IsActive = false;
                 _context.Houses.Update(data);
 
                 var auditInfo = new AuditDto()
