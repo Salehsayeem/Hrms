@@ -1,0 +1,196 @@
+<!-- <div class="auth-main">
+  <div class="auth-wrapper v3">
+    <div class="auth-form">
+      <div class="card my-5">
+        <div class="card-body">
+          <a href="#" class="d-flex justify-content-center">
+            <img src="assets/images/logo-dark.svg" />
+          </a>
+          <div class="row">
+            <div class="d-flex justify-content-center">
+              <div class="auth-header">
+                <h2 class="text-secondary mt-5"><b>Hi, Welcome Back</b></h2>
+                <p class="fs-4 mt-2">Enter your credentials to continue</p>
+              </div>
+            </div>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="floatingInput" [(ngModel)]="loginModel.phone" name="phone" />
+            <label for="floatingInput">Phone</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="password" [(ngModel)]="loginModel.password" name="password" />
+            <label for="password">Password</label>
+          </div>
+          <div class="d-flex mt-1 justify-content-between">
+            <div class="form-check">
+              <input class="form-check-input input-primary" type="checkbox" id="customCheckc1" checked="" />
+              <label class="form-check-label text-muted" for="customCheckc1">Remember me</label>
+            </div>
+            <h5 class="text-secondary">
+              <a href="javascript:">Forgot Password?</a>
+            </h5>
+          </div>
+          <div class="d-grid mt-4">
+            <button type="button" class="btn btn-secondary" (click)="onSubmit()">Sign In</button>
+          </div>
+          <hr />
+          <h5 class="d-flex justify-content-center">
+            <a [routerLink]="['/auth/register']">Don't have an account?</a>
+          </h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<div class="container">
+  <section
+    class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4"
+  >
+    <div class="container">
+      <div class="row justify-content-center">
+        <div
+          class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center"
+        >
+          <div class="d-flex justify-content-center py-4">
+            <a href="#" class="logo d-flex align-items-center w-auto">
+              <img src="../../../../assets/logo.png" alt="" />
+              <span class="d-none d-lg-block">HRMS</span>
+            </a>
+          </div>
+          <!-- End Logo -->
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="pt-4 pb-2">
+                <h5 class="card-title text-center pb-0 fs-4">
+                  Login to Your Account
+                </h5>
+                <p class="text-center small">
+                  Enter your phone & password to login
+                </p>
+              </div>
+              <form
+                [formGroup]="loginForm"
+                class="row g-3 needs-validation"
+                (ngSubmit)="onSubmit()"
+                autocomplete="off"
+              >
+                <div class="col-12">
+                  <div class="form-floating">
+                    <input
+                      type="text"
+                      formControlName="phone"
+                      name="phone"
+                      class="form-control"
+                      id="floatingphone"
+                      placeholder="Your phone"
+                      required
+                      [ngStyle]="{border: (formControls['phone'].touched || submitted) && formControls['phone'].errors?.['required'] ? '3px solid red':''}"
+                    />
+                    <label for="floatingphone">Your phone</label>
+                    <div
+                      *ngIf="
+                        loginForm.get('phone')?.invalid &&
+                        (loginForm.get('phone')?.dirty ||
+                          loginForm.get('phone')?.touched)
+                      "
+                      class="error"
+                    >
+                      <div *ngIf="formControls['phone'].errors?.['required']">
+                        Please enter your phone!
+                      </div>
+                      <div
+                        *ngIf="formControls['phone'].errors?.['patternInvalid']"
+                      >
+                        Please enter a valid phone number
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-floating">
+                    <input
+                      formControlName="password"
+                      name="password"
+                      class="form-control"
+                      id="floatingpassword"
+                      placeholder="Your password"
+                      type="password"
+                      autocomplete="false"
+                      required
+                      [ngStyle]="{border: (formControls['password'].touched || submitted) && formControls['password'].errors?.['required'] ? '3px solid red':''}"
+                    />
+                    <label for="floatingpassword">Your password</label>
+                    <span
+                      class="password-toggle"
+                      (click)="togglePasswordVisibility()"
+                    >
+                      <i class="bi bi-eye"></i>
+                    </span>
+                    <div
+                      *ngIf="
+                        loginForm.get('password')?.invalid &&
+                        (loginForm.get('password')?.dirty ||
+                          loginForm.get('password')?.touched)
+                      "
+                      class="error"
+                    >
+                      Please, enter your password!
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="remember"
+                      value="true"
+                      id="rememberMe"
+                    />
+                    <label class="form-check-label" for="rememberMe"
+                      >Remember me</label
+                    >
+                  </div>
+                </div>
+                <div class="col-12">
+
+                  <button
+                  type="submit"
+                  class="btn btn-primary btn-lg btn-block w-100"
+                  [disabled]="submitted || loginForm.invalid"
+                >
+                  <span *ngIf="submitted">
+                    <div class="spinner-border spinner-border-sm text-warning" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </span>
+                  <span *ngIf="!submitted">
+                    Login
+                  </span>
+                </button>
+
+                </div>
+
+                <div class="col-12">
+                  <p class="small mb-0">
+                    Don't have account?
+                    <a routerLink="/signup"> Create an account</a>
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="credits">
+            Designed by <a href="https://salehsayeem.com/">DINN</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

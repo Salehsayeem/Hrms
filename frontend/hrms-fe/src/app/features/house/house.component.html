@@ -1,0 +1,263 @@
+<div class="card shadow">
+  <div class="card-body">
+    <h5 class="card-title">List of Houses</h5>
+    <div class="row mb-3">
+      <div class="col-sm-4">
+        <div class="input-group">
+          <input
+            class="form-control"
+            type="text"
+            [(ngModel)]="search"
+            placeholder="Search"
+          />
+
+          <custom-button
+            [text]="'Search'"
+            [btnClass]="'primary'"
+            [btnDisabled]="false"
+            (click)="getHousesPagination()"
+          ></custom-button>
+        </div>
+      </div>
+      <div class="col-sm-8 text-end">
+        <custom-button
+        [text]="'Add New'"
+        [btnClass]="'primary'"
+        [btnDisabled]="false"
+        (click)="openModal(0)"
+      >
+      </custom-button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover shadow">
+        <thead class="table-primary">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Address</th>
+            <th scope="col">Contact</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <div
+            *ngIf="
+              this.houses !== undefined && this.houses.length <= 0;
+              else showTable
+            "
+          >
+            <p>No records found</p>
+          </div>
+          <ng-template #showTable>
+            <tr *ngFor="let item of houses">
+              <th scope="row">{{ item.sl }}</th>
+              <td>{{ item.name }}</td>
+              <td>{{ item.address }}</td>
+              <td>{{ item.contact }}</td>
+              <td>
+                <custom-button
+                  [text]="''"
+                  [btnClass]="'primary'"
+                  [btnDisabled]="false"
+                  (click)="openModal(1, item.id)"
+                  type="button"
+                >
+                  <i class="bi bi-pencil-fill"></i>
+                </custom-button>
+                <span class="mx-2"></span>
+                <custom-button
+                  [text]="''"
+                  [btnClass]="'danger'"
+                  [btnDisabled]="false"
+                  (click)="deleteModal(item.id)"
+                  type="button"
+                >
+                <i class="bi bi-trash-fill"></i>
+                </custom-button>
+                <!--
+                <span class="mx-2"></span>
+                <custom-button
+                  [text]="''"
+                  (click)="previewModal(item.id)"
+                  [btnClass]="'btn'"
+                  type="button"
+                >
+                <i class="bi bi-eye"></i>
+                </custom-button>
+                <span class="mx-2"></span>
+                <custom-button
+                  [text]="''"
+                  [btnClass]="'btn btn-danger'"
+                  (click)="deleteModal(item.id)"
+                >
+                  <i class="bx bxs-trash-alt"></i>
+                </custom-button> -->
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="this.houses">
+      <div *ngIf="this.houses.length > 0">
+        <pagination
+          [currentPage]="pageNo"
+          [pageSize]="pageSize"
+          [totalPages]="totalCount / pageSize"
+          [totalCount]="totalCount"
+          (pageChanged)="onPageChange($event)"
+        ></pagination>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form-modal [title]="modalTitle" [type]="addOrUpdate">
+  <ng-template #formTemplate>
+    <form
+      [formGroup]="houseForm"
+      class="row g-3 needs-validation"
+      (ngSubmit)="modalSaveOrUpdate()"
+      autocomplete="off"
+    >
+      <div class="col-12">
+        <div class="form-floating">
+          <input
+            type="text"
+            formControlName="name"
+            name="name"
+            class="form-control"
+            id="floatingname"
+            placeholder="Enter House Name"
+            required
+            [ngStyle]="{border: (formControls['name'].touched || submitted) && formControls['name'].errors?.['required'] ? '3px solid red':''}"
+          />
+          <label for="floatingname"> Name</label>
+          <div
+            *ngIf="
+              houseForm.get('name')?.invalid &&
+              (houseForm.get('name')?.dirty || houseForm.get('name')?.touched)
+            "
+            class="error"
+          >
+            Please, enter your house name!
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="form-floating">
+          <input
+            type="text"
+            formControlName="address"
+            name="address"
+            class="form-control"
+            id="floatingAddress"
+            placeholder="Enter House Adderess"
+            required
+            [ngStyle]="{border: (formControls['address'].touched || submitted) && formControls['address'].errors?.['required'] ? '3px solid red':''}"
+          />
+          <label for="floatingAddress">Address</label>
+          <div
+            *ngIf="
+              houseForm.get('address')?.invalid &&
+              (houseForm.get('address')?.dirty ||
+                houseForm.get('address')?.touched)
+            "
+            class="error"
+          >
+            Please, enter your house address!
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="form-floating">
+          <input
+            type="text"
+            formControlName="contact"
+            name="contact"
+            class="form-control"
+            id="floatingcontact"
+            placeholder="Enter House Contact"
+            required
+            [ngStyle]="{border: (formControls['contact'].touched || submitted) && formControls['contact'].errors?.['required'] ? '3px solid red':''}"
+          />
+          <label for="floatingcontact">Contact</label>
+          <div
+            *ngIf="
+              houseForm.get('contact')?.invalid &&
+              (houseForm.get('contact')?.dirty ||
+                houseForm.get('contact')?.touched)
+            "
+            class="error"
+          >
+            Please, enter your house Contact!
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <custom-button
+          [btnClass]="'primary btn-lg btn-block'"
+          [text]="'Save changes'"
+          [btnDisabled]="submitted || houseForm.invalid"
+        >
+        </custom-button>
+      </div>
+    </form>
+  </ng-template>
+</form-modal>
+
+<!--
+<dinn-confirmation-modal [title]="modalTitle">
+  <ng-template #previewTemplate>
+    <div class="col">
+      <div class="card">
+        <div class="card-body pt-3">
+          <div class="row">
+            <div class="col label">Name</div>
+            <div class="col">{{ previewMealCategory?.name }}</div>
+          </div>
+
+          <div class="row">
+            <div class="col label">Price</div>
+            <div class="col">
+              {{ previewMealCategory?.price }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</dinn-confirmation-modal>
+-->
+
+<confirmation-modal [title]="modalTitle">
+  <ng-template #deleteTemplate>
+    <div class="col">
+      <div class="card">
+        <div class="card-body pt-3">
+          <div class="row">
+            <div class="col text-center">
+              <h5>
+                This action cannot be undone
+                <i class="bx bx-message-square-x" style="color: red"></i>
+              </h5>
+            </div>
+          </div>
+          <div class="card-footer d-flex justify-content-end">
+            <button
+              class="btn btn-danger ms-auto"
+              (click)="deleteHouse()"
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</confirmation-modal>

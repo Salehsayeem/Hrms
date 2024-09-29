@@ -1,0 +1,10 @@
+<button
+  class="btn mb-md-0 mb-2"
+  [ngClass]="['btn-' + btnClass]"
+  [disabled]="btnDisabled"
+  (click)="emitEvent()"
+>
+  <!-- {{ text }} -->
+  <ng-content></ng-content>
+  {{ text }}
+</button>
