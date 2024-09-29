@@ -1,0 +1,150 @@
+-- Active: 1725262939744@@127.0.0.1@5432@hrms_db@public
+DROP FUNCTION fn_get_houses_pagination;
+CREATE OR REPLACE FUNCTION public.fn_get_houses_pagination(_search text, _userid text, _page_no integer, _page_size integer)
+ RETURNS SETOF refcursor
+ LANGUAGE plpgsql
+AS $function$
+DECLARE 
+	ref1 refcursor:= 'ref1';
+	total_count refcursor:= 'total_count';
+begin
+
+CREATE TEMP TABLE IF NOT EXISTS temp_table AS
+SELECT 
+        CAST(ROW_NUMBER() OVER (ORDER BY h."Id")as integer) AS "Sl",
+        h."Id",
+        h."Name",
+        h."Address",
+        h."Contact"
+    FROM 
+        public."Houses" h
+    WHERE 
+        h."CreatedBy" = _userId
+		AND h."IsActive"
+        AND (_search IS NULL OR h."Name" ILIKE '%' || _search || '%' 
+                        OR h."Address" ILIKE '%' || _search || '%');
+
+open ref1 for SELECT tmp.*                  
+          FROM temp_table tmp          
+		  ORDER BY  tmp."Id" DESC
+		  LIMIT _page_size  OFFSET ((_page_no-1) * _page_size);
+	return next ref1;
+	
+open total_count for select count(tmp."Id")  as total_count
+				 FROM temp_table tmp; 		
+return next total_count;
+end;
+$function$
+
+
+-- Active: 1725262939744@@127.0.0.1@5432@hrms_db@public
+DROP FUNCTION fn_get_renter_types_pagination;
+CREATE OR REPLACE FUNCTION public.fn_get_renter_types_pagination(_search text, _user_id text, _page_no integer, _page_size integer)
+ RETURNS SETOF refcursor
+ LANGUAGE plpgsql
+AS $function$
+DECLARE 
+	ref1 refcursor:= 'ref1';
+	total_count refcursor:= 'total_count';
+begin
+
+CREATE TEMP TABLE IF NOT EXISTS temp_table AS
+SELECT 
+        CAST(ROW_NUMBER() OVER (ORDER BY rt."Id")as integer) AS "Sl",
+        rt."Id",
+        rt."Name"
+	FROM 
+	public."RenterTypes" rt
+    WHERE 
+        rt."CreatedBy" = _user_id
+		AND rt."IsActive"
+        AND (_search IS NULL OR rt."Name" ILIKE '%' || _search || '%' );
+
+open ref1 for SELECT tmp.*                  
+          FROM temp_table tmp          
+		  ORDER BY  tmp."Id" DESC
+		  LIMIT _page_size  OFFSET ((_page_no-1) * _page_size);
+	return next ref1;
+	
+open total_count for select count(tmp."Id")  as total_count
+				 FROM temp_table tmp; 		
+return next total_count;
+end;
+$function$
+
+
+-- Active: 1725262939744@@127.0.0.1@5432@hrms_db@public
+DROP FUNCTION fn_get_room_categories_pagination;
+CREATE OR REPLACE FUNCTION public.fn_get_room_categories_pagination(_search text, _house_id bigint, _page_no integer, _page_size integer)
+ RETURNS SETOF refcursor
+ LANGUAGE plpgsql
+AS $function$
+DECLARE 
+	ref1 refcursor:= 'ref1';
+	total_count refcursor:= 'total_count';
+begin
+
+CREATE TEMP TABLE IF NOT EXISTS temp_table AS
+SELECT 
+        CAST(ROW_NUMBER() OVER (ORDER BY rc."Id")as integer) AS "Sl",
+        rc."Id",
+        rc."Name"
+	FROM 
+	public."RoomCategories" rc
+    WHERE 
+        rc."HouseId" = _house_id
+		AND rc."IsActive"
+        AND (_search IS NULL OR rc."Name" ILIKE '%' || _search || '%' );
+
+open ref1 for SELECT tmp.*                  
+          FROM temp_table tmp          
+		  ORDER BY  tmp."Id" DESC
+		  LIMIT _page_size  OFFSET ((_page_no-1) * _page_size);
+	return next ref1;
+	
+open total_count for select count(tmp."Id")  as total_count
+				 FROM temp_table tmp; 		
+return next total_count;
+end;
+$function$
+
+
+-- Active: 1725262939744@@127.0.0.1@5432@hrms_db@public
+DROP FUNCTION fn_get_room_pagination;
+CREATE OR REPLACE FUNCTION public.fn_get_room_pagination(_search text, _house_id bigint, _room_category_id bigint, _user_id text, _page_no integer, _page_size integer)
+ RETURNS SETOF refcursor
+ LANGUAGE plpgsql
+AS $function$
+DECLARE 
+	ref1 refcursor:= 'ref1';
+	total_count refcursor:= 'total_count';
+begin
+
+CREATE TEMP TABLE IF NOT EXISTS temp_table AS
+select 
+        cast(row_number() over (order by r."Id")as integer) as "Sl",
+        r."Id",
+        r."Name",
+		r."BasePrice",
+		r."BillGenerationDate",
+		r."IsRented"
+	FROM 
+	public."Rooms" r
+    WHERE 
+        r."HouseId" = _house_id
+		AND r."RoomCategoryId" = _room_category_id
+AND r."CreatedBy" = _user_id
+		AND r."IsActive"
+        AND (_search IS NULL OR r."Name" ILIKE '%' || _search || '%' );
+
+open ref1 for SELECT tmp.*                  
+          FROM temp_table tmp          
+		  ORDER BY  tmp."Id" DESC
+		  LIMIT _page_size  OFFSET ((_page_no-1) * _page_size);
+	return next ref1;
+	
+open total_count for select count(tmp."Id")  as total_count
+				 FROM temp_table tmp; 		
+return next total_count;
+end;
+$function$
